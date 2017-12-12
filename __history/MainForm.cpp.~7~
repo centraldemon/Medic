@@ -1,0 +1,147 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include <fstream>
+#include "MainForm.h"
+#include "prog.h"
+#include "Unit3.h"
+#include "Unit4.h"
+#include "ClassUnit.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+using namespace std;
+TForm2 *Form2;
+list<Ill> ills;
+ifstream fin;
+//---------------------------------------------------------------------------
+
+void FillIlls(ifstream &fin)
+{
+	string text;
+	Ill *ill;
+	bool name=true;
+	bool symp=false;
+	bool org=false;
+	bool desc=false;
+	bool firstdes=true;
+	string des("");
+	while(!fin.eof())
+	{
+	   fin>>text;
+	   if(text==":")
+	   {
+		   org=true;
+		   symp=false;
+	   }
+	   else
+	   {
+		   if(text=="*")
+		   {
+			   desc=true;
+			   org=false;
+			   firstdes=true;
+		   }
+		   else
+		   {
+			   if(text=="\n")
+			   {
+				   name=true;
+				   desc=false;
+				   ills.push_back(*ill);
+			   }
+			   else
+			   {
+				   if(name)
+				   {
+					  ill= new Ill(text);
+					  symp=true;
+					  name=false;
+				   }
+				   if(symp)
+				   {
+					   ill->AddSymptom(text);
+
+				   }
+				   if(org)
+				   {
+					   ill->AddOrgan(text);
+				   }
+				   if(desc)
+				   {
+					  if(firstdes)
+					  {
+						  des+=text;
+						  firstdes=false;
+					  }
+					  else
+					  {
+						  des+=" ";
+						  des+=text;
+					  }
+				   }
+
+			   }
+		   }
+	   }
+	}
+	ills.push_back(*ill);
+}
+//---------------------------------------------------------------------------
+__fastcall TForm2::TForm2(TComponent* Owner)
+	: TForm(Owner)
+{
+	fin.open("ill.txt",ios_base::out);
+	 FillIlls(fin);
+	 for(list<Ill>::iterator it=ills.begin();it!=ills.end();it++)
+	 {
+		 RezultBox->Items->Add((*it).GetName().c_str());
+     }
+}
+
+
+//---------------------------------------------------------------------------
+void __fastcall TForm2::FormClose(TObject *Sender, TCloseAction &Action)
+{
+	Form1->Show();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::SymptomLabelMouseEnter(TObject *Sender)
+{
+	SymptomLabel->Font->Color=clGreen;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::SymptomLabelMouseLeave(TObject *Sender)
+{
+	SymptomLabel->Font->Color=clRed;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::OrganLabelMouseEnter(TObject *Sender)
+{
+	 OrganLabel->Font->Color=clGreen;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::OrganLabelMouseLeave(TObject *Sender)
+{
+      OrganLabel->Font->Color=clRed;
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm2::SymptomLabelClick(TObject *Sender)
+{
+	Form3->Show();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::OrganLabelClick(TObject *Sender)
+{
+	Form4->Show();
+}
+//---------------------------------------------------------------------------
+
